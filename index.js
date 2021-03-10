@@ -1,22 +1,46 @@
-const express = require('express');
-const redis = require('redis');
+const express = require("express");
+const path = require("path");
+const { uid } = require("rand-token");
+
 const app = express();
 
-app.use(express.json());
+const bins = {};
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
+  res.json(bins);
+})
 
-});
-app.get('/request', (req, res) => {
-    res.json(req);
-});
+app.get("/getBin", (req, res) => {
+  const token = uid(10);
+  bins[token] = [];
+  const binURL = `localhost:3000/r/${token}`;
 
-app.post('/request', (req, res) => {
-    res.json(req);
-});
+  res.send(binURL);
+})
 
-const PORT = process.env.PORT || 3000;
+app.all("/r/:token", (req, res) => {
+  const token = req.params.token;
 
-app.listen(PORT, () => {
-  console.log(`The server is listening on port: ${PORT}`);
-});
+  if (!bins[token]) {
+    res.redirect("/");
+    return
+  }
+
+  const { path, method, httpVersion, headers, body } = req;
+  const requestObject = { path, method, httpVersion, headers, body };
+
+  bins[token].push(requestObject);
+  res.send(req.ip);
+})
+
+app.get("/bin/:token", (req, res) => {
+  const token = req.params.token;
+
+  if (!bins[token]) {
+    res.redirect("/");
+  }
+
+  res.send(bins[token]);
+})
+
+app.listen(process.env.PORT || 3000);

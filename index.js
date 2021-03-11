@@ -1,46 +1,59 @@
 const express = require("express");
-const path = require("path");
+const redis = require("redis");
 const { uid } = require("rand-token");
+
+const redisClient = redis.createClient({
+  host: process.env.HOST,
+  password: process.env.PASSWORD,
+});
 
 const app = express();
 
-const bins = {};
-
-app.get("/", (req, res) => {
-  res.json(bins);
+app.get("/", (_req, res) => {
+  res.json("home");
 })
 
-app.get("/getBin", (req, res) => {
+app.get("/getBin", (_req, res) => {
   const token = uid(10);
-  bins[token] = [];
-  const binURL = `localhost:3000/r/${token}`;
+  redisClient.set(token, "{\"requests\": []}");
 
+  const binURL = `localhost:3000/r/${token}`;
   res.send(binURL);
 })
 
 app.all("/r/:token", (req, res) => {
   const token = req.params.token;
 
-  if (!bins[token]) {
-    res.redirect("/");
-    return
-  }
+  redisClient.get(token, (_err, value) => {
 
-  const { path, method, httpVersion, headers, body } = req;
-  const requestObject = { path, method, httpVersion, headers, body };
+    if (!value) {
+      res.redirect("/");
+      return
+    }
+    const bin = JSON.parse(value);
+    console.log(bin);
+    const { path, method, httpVersion, headers, body } = req;
+    const requestObject = { path, method, httpVersion, headers, body };
 
-  bins[token].push(requestObject);
-  res.send(req.ip);
-})
+    bin.requests.push(requestObject);
+
+    redisClient.set(token, JSON.stringify(bin));
+
+    res.send(req.ip);
+  });
+});
 
 app.get("/bin/:token", (req, res) => {
   const token = req.params.token;
 
-  if (!bins[token]) {
-    res.redirect("/");
-  }
+  redisClient.get(token, (_err, value) => {
 
-  res.send(bins[token]);
-})
+    if (!value) {
+      res.redirect("/");
+    }
+
+    res.send(JSON.parse(value));
+  });
+});
 
 app.listen(process.env.PORT || 3000);

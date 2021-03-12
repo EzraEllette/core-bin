@@ -16,6 +16,7 @@ app.get("/", (_req, res) => {
 app.get("/getBin", (_req, res) => {
   const token = uid(10);
   redisClient.set(token, "{\"requests\": []}");
+  redisClient.set(token, 1200);
 
   const binURL = `localhost:3000/r/${token}`;
   res.send(binURL);
@@ -31,9 +32,8 @@ app.all("/r/:token", (req, res) => {
       return
     }
     const bin = JSON.parse(value);
-    console.log(bin);
-    const { path, method, httpVersion, headers, body } = req;
-    const requestObject = { path, method, httpVersion, headers, body };
+    const { path, method, httpVersion, headers, body, ip } = req;
+    const requestObject = { path, method, httpVersion, headers, body, ip };
 
     bin.requests.push(requestObject);
 

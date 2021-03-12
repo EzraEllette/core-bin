@@ -2,12 +2,19 @@ const express = require("express");
 const redis = require("redis");
 const { uid } = require("rand-token");
 
+
+
+
+const app = express();
+app.use(express.static("public"));
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 const redisClient = redis.createClient({
   host: process.env.HOST,
   password: process.env.PASSWORD,
 });
-
-const app = express();
+app.use(require("cors")());
+app.use(express.json());
 
 app.get("/", (_req, res) => {
   res.json("home");
@@ -16,10 +23,9 @@ app.get("/", (_req, res) => {
 app.get("/getBin", (_req, res) => {
   const token = uid(10);
   redisClient.set(token, "{\"requests\": []}");
-  redisClient.set(token, 1200);
+  redisClient.expire(token, 1200);
 
-  const binURL = `localhost:3000/r/${token}`;
-  res.send(binURL);
+  res.json({bin: token });
 })
 
 app.all("/r/:token", (req, res) => {
@@ -31,14 +37,14 @@ app.all("/r/:token", (req, res) => {
       res.redirect("/");
       return
     }
+
     const bin = JSON.parse(value);
-    const { path, method, httpVersion, headers, body, ip } = req;
-    const requestObject = { path, method, httpVersion, headers, body, ip };
+    const { path, method, protocol, httpVersion, headers, body, ip } = req;
+    const requestObject = { path, method, protocol, httpVersion, headers, body, ip };
 
     bin.requests.push(requestObject);
-
     redisClient.set(token, JSON.stringify(bin));
-
+    io.to(token).emit("newRequest", requestObject);
     res.send(req.ip);
   });
 });
@@ -52,8 +58,27 @@ app.get("/bin/:token", (req, res) => {
       res.redirect("/");
     }
 
-    res.send(JSON.parse(value));
+    res.json(JSON.parse(value));
   });
 });
 
-app.listen(process.env.PORT || 3000);
+// app.listen(process.env.PORT || 3000);
+
+//Whenever someone connects this gets executed
+io.on('connection', function(socket) {
+  console.log('A user connected');
+
+  socket.on('joinRoom', function (token) {
+    socket.join(token)
+  });
+
+
+   //Whenever someone disconnects this piece of code executed
+  socket.on('disconnect', function () {
+    console.log('A user disconnected');
+  });
+});
+
+http.listen(process.env.PORT || 3000, function() {
+   console.log('listening on *:3000');
+});

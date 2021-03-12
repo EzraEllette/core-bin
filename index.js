@@ -1,17 +1,21 @@
+// const API = require('./api') // when testing the api
+const path = require('path');
 const express = require("express");
 const redis = require("redis");
+require('dotenv').config();
 const { uid } = require("rand-token");
-
 const redisClient = redis.createClient({
   host: process.env.HOST,
   password: process.env.PASSWORD,
 });
-
+const root = __dirname + "/public/"
 const app = express();
 
+app.use('/', express.static(path.join(__dirname, 'public')));
+// app.use('/html',express.static(path.join(__dirname, 'public')));
 app.get("/", (_req, res) => {
-  res.json("home");
-})
+  res.sendFile("index.html", {root});
+});
 
 app.get("/getBin", (_req, res) => {
   const token = uid(10);
@@ -43,17 +47,18 @@ app.all("/r/:token", (req, res) => {
   });
 });
 
-app.get("/bin/:token", (req, res) => {
+app.get('/find/:token', async (req, res) => {
   const token = req.params.token;
-
-  redisClient.get(token, (_err, value) => {
-
+  await redisClient.get(token, (_err, value) => {
     if (!value) {
       res.redirect("/");
-    }
-
-    res.send(JSON.parse(value));
+   }
+    res.send(JSON.parse(value))
   });
-});
+})
+app.get("/bin/:token", (req, res) => {
+  res.sendFile("requests.html", {root});
 
-app.listen(process.env.PORT || 3000);
+});
+const PORT =  process.env.PORT || 3000 // change for production
+app.listen(PORT);

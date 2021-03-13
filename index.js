@@ -1,4 +1,3 @@
-// const API = require('./api') // when testing the api
 const path = require('path');
 const express = require("express");
 const redis = require("redis");
@@ -12,7 +11,6 @@ const root = __dirname + "/public/"
 const app = express();
 
 app.use('/', express.static(path.join(__dirname, 'public')));
-// app.use('/html',express.static(path.join(__dirname, 'public')));
 app.get("/", (_req, res) => {
   res.sendFile("index.html", {root});
 });

@@ -7,13 +7,15 @@ const { uid } = require("rand-token");
 
 const app = express();
 app.use(express.static("public"));
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+
+
 const redisClient = redis.createClient({
   host: process.env.HOST,
   password: process.env.PASSWORD,
 });
 app.use(require("cors")());
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 app.use(express.json());
 
 app.get("/", (_req, res) => {

@@ -1,39 +1,20 @@
-let socket;
-class Socket {
-  constructor(token) {
-    this.token = token
-    this.current = io(`http://127.0.0.1:3000/`);
-    this.requests = []
-    this.init()
+export default class Socket {
+  constructor(token, callback) {
+    this.token = token;
+    this.current = io(``);
+    this.init(callback);
   }
 
-  bindEvents() {
-    // this.current.on('findDir', this.getRequests.bind(this))
-    this.current.on('newRequest', this.handleRequest.bind(this));
+  bindEvents(callback) {
+    this.current.on('newRequest', callback);
   }
 
   joinRoom() {
     this.current.emit('joinRoom', this.token);
   }
 
-  getRequests(requests) {
-    this.requests = requests
-  }
-
-  handleRequest(request) {
-    this.requests.push(request)
-    // ezra magic
-  }
-
-  init() {
+  init(callback) {
     this.joinRoom();
-    this.bindEvents()
+    this.bindEvents(callback);
   }
-
 }
-
-document.addEventListener('DOMContentLoaded', event => {
-  const bin = window.location.toString().split('?bin=')[1];
-
-  socket = new Socket(bin)
-})

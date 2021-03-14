@@ -14,14 +14,16 @@ const formatRequests = (() => {
       req.body = JSON.stringify(req.body, null, "   ");
     }
     req.i = i;
-    console.log(i);
     i++
   };
 })();
 
 (async () => {
   const bin = window.location.toString().split('?bin=')[1];
-  document.getElementById("bin-link").innerText = `http://localhost:3000/r/${bin}`;
+
+  document.getElementById("bin-link").innerText = `http://localhost:3000/r/${bin || ''}`;
+  if (!bin) return;
+  localStorage.setItem('mostRecent', `/requests.html?bin=${bin}`)
   const requests = await (await fetch(`http://localhost:3000/bin/${bin}`)).json()
 
   requests.requests.forEach(formatRequests);

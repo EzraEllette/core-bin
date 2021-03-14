@@ -18,10 +18,6 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 app.use(express.json());
 
-app.get("/", (_req, res) => {
-  res.json("home");
-})
-
 app.get("/getBin", (_req, res) => {
   const token = uid(10);
   redisClient.set(token, "{\"requests\": []}");
@@ -32,7 +28,6 @@ app.get("/getBin", (_req, res) => {
 
 app.all("/r/:token", (req, res) => {
   const token = req.params.token;
-
   redisClient.get(token, (_err, value) => {
 
     if (!value) {

@@ -2,12 +2,8 @@ const express = require("express");
 const redis = require("redis");
 const { uid } = require("rand-token");
 
-
-
-
 const app = express();
 app.use(express.static("public"));
-
 
 const redisClient = redis.createClient({
   host: process.env.HOST,

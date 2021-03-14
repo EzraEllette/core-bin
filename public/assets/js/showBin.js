@@ -2,7 +2,7 @@ import Socket from './socket.js';
 
 
 const formatRequests = (() => {
-  let i = 0;
+  let identifier = 0;
   return (req) => {
     if (Object.keys(req.headers).length === 0) {
       req.headers = null;
@@ -13,9 +13,9 @@ const formatRequests = (() => {
     } else {
       req.body = JSON.stringify(req.body, null, "   ");
     }
-    req.i = i;
+    req.i = identifier;
     console.log(i);
-    i++
+    identifier++
   };
 })();
 

@@ -8,8 +8,8 @@ function updateBinsBar(token) {
   if (!bins) {
     bins = {};
   } else {
-    for (let [k, v] in bins) {
-      if (Date.now() - v > 1200000) {
+    for (const k in bins) {
+      if (Date.now() - bins[k] > 1200000) {
         delete bins[k]
       }
     }

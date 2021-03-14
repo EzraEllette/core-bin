@@ -54,12 +54,16 @@ app.all("/r/:token", (req, res) => {
 app.get("/bin/:token", (req, res) => {
   const token = req.params.token;
 
+  if (!token) return;
+  console.log(`"${token}"`);
   redisClient.get(token, (_err, value) => {
+
+    console.log(value);
 
     if (!value) {
       res.redirect("/");
+      return;
     }
-
     res.json(JSON.parse(value));
   });
 });

@@ -3,6 +3,15 @@
 
 <head>
   <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+  <script type="text/x-handlebars" id="bins-bar">
+      <ul>
+      {{#each bins}}
+        <li class="bin-link">
+          <a href="http://localhost:3000/requests.html?bin={{@key}}">{{@key}}
+        </li>
+      {{/each}}
+      </ul>
+  </script>
   <script type="text/x-handlebars" id="request-part">
     <div class="req container mt-2">
       <a class="btn btn-secondary" data-toggle="collapse" href="#col{{request.i}}" role="button" aria-expanded="false" aria-controls="col{{request.i}}">
@@ -61,9 +70,15 @@
 </head>
 
 <body>
+  <div id="modal-layer">
+    <div id="modal-box">
 
+    </div>
+  </div>
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
+
+
     <div class="container-fluid d-flex">
 
       <div class="logo mr-auto">
@@ -75,7 +90,7 @@
           <li class="active"><a href="index.html">Home</a></li>
           <li><a href="#contact">Contact Us</a></li>
 
-          <li class="login"><a href="#about">Logout</a></li>
+          <li class="login" id="bins"><a href="#about">My Bins</a></li>
         </ul>
       </nav><!-- .nav-menu -->
 
@@ -97,7 +112,7 @@
 
     <section class="inner-page">
       <div class="container">
-        <h1>requests go here</h1>
+        <h1>Requests</h1>
         <div id="place-for-requests" class="container"></div>
       </div>
     </section>
@@ -118,7 +133,6 @@
               <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy policy</a></li>
             </ul>
           </div>
-
         </div>
       </div>
     </div>
